@@ -2,6 +2,8 @@ const OrbitControls = require('three-orbit-controls')(THREE)
 
 import vsBasic from "shaders/basic.vs"
 import fsBasic from "shaders/basic.fs"
+import fsShadow from "shaders/shadow.fs"
+import vsShadow from "shaders/shadow.vs"
 import audio from "mnf/audio"
 import ColorPass from "postprocess/ColorPass"
 import gui from 'mnf/gui'
@@ -52,22 +54,7 @@ class Main {
 		this.passes.push( this.colorPass )
 
 		// -------------------------------------------------------------------------------------------------- YOUR SCENE
-		const nbTriangle = 18;
-
-		const angleStep = Math.PI*2/nbTriangle;
-
-		const group = new THREE.Group();
-		const scale = 50;
-		group.scale.set(scale,scale,scale);
-
-		for (var j = 30; j > 0; j--) {
-			const circleGroup = this.createCircleGroup(j*.2, nbTriangle, j);
-			circleGroup.rotation.z =  j*angleStep/2;
-			const scale = .2+j*.2;
-			//circleGroup.scale.set( scale, scale, scale )
-			group.add(circleGroup);
-		}
-		this.scene.add(group);
+		this.createRosace();
 
 		let geometry = new THREE.IcosahedronGeometry(100,2)
 		let material = new THREE.MeshBasicMaterial( { color: 0xffffff, wireframe:false } )
@@ -96,13 +83,30 @@ class Main {
 		window.addEventListener( 'resize', this.onResize, false )
 		this.animate()
 	}
+	createRosace(){
+		const nbTriangle = 18;
+		const angleStep = Math.PI*2/nbTriangle;
+		const group = new THREE.Group();
+		const scale = 50;
+		group.scale.set(scale,scale,scale);
+
+		for (var j = 30; j > 0; j--) {
+			const circleGroup = this.createCircleGroup(j*.2, nbTriangle, j);
+			circleGroup.rotation.z =  j*angleStep/2;
+			const scale = .2+j*.2;
+			circleGroup.scale.set( scale, scale, scale )
+			group.add(circleGroup);
+		}
+		this.scene.add(group);
+	}
 	createCircleGroup(radius = .5, nbTriangle = 18, index){
 		const group = new THREE.Group();
 		const triangles = [];
 		const angleStep = Math.PI*2/nbTriangle;
 		const colors = [0x30868B, 0x93B424, 0x2F64A0, 0xE88C2D, 0xD32541, 0xAA1F8C];
 		for (var i = 0; i < nbTriangle; i++) {
-			triangles[i] = this.createTriangleMesh(colors[(i*2+index)%(colors.length-1)]);
+			const selectColorIndex = (i*2+index)%(colors.length-1);
+			triangles[i] = this.createTriangleMesh(colors[selectColorIndex]);
 			const angle = angleStep*i;
 			triangles[i].position.x = Math.cos(angle) * radius;
 			triangles[i].position.y = Math.sin(angle) * radius;
@@ -115,7 +119,14 @@ class Main {
 
 		const mesh = new THREE.Mesh(
 			this.createTriangleGeometry(),
-			new THREE.MeshBasicMaterial({color: color}),
+			//new THREE.MeshBasicMaterial({color: color}),
+			new THREE.RawShaderMaterial( {
+				uniforms: {
+					color: { type: "c", value: new THREE.Color( color ) }
+				},
+				vertexShader: vsShadow,
+				fragmentShader: fsShadow
+			} ),
 		);
 		return mesh;
 	}
