@@ -57,7 +57,7 @@ class Main {
 		const angleStep = Math.PI*2/nbTriangle;
 
 		const group = new THREE.Group();
-		const scale = 50;
+		const scale = 100;
 		group.scale.set(scale,scale,scale);
 
 		for (var j = 30; j > 0; j--) {
