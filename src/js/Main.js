@@ -9,7 +9,7 @@ import gui from 'mnf/gui'
 class Main {
 
 	constructor(){
-		
+
 		// -------------------------------------------------------------------------------------------------- SCENE
 
 		this.scene = new THREE.Scene()
@@ -18,7 +18,7 @@ class Main {
 		this.renderer.setSize( window.innerWidth, window.innerHeight )
 		this.renderer.setClearColor( 0x222222, 1);
 		document.body.appendChild( this.renderer.domElement )
-		
+
 		// -------------------------------------------------------------------------------------------------- CAMERA
 
 		this.camera = new THREE.PerspectiveCamera( 35, window.innerWidth / window.innerHeight, 1, 1000 )
@@ -36,7 +36,7 @@ class Main {
 
 		//create a bloom pass
 		this.bloomPass = new WAGNER.MultiPassBloomPass(128,128)
-		this.bloomPass.activate = true
+		this.bloomPass.activate = false
 		// this.bloomPass.params.applyZoomBlur = true
 		this.bloomPass.params.blurAmount = 0.4
 		let g = f.addFolder('bloom1')
@@ -46,19 +46,35 @@ class Main {
 		g.add(this.bloomPass.params,'applyZoomBlur')
 		//custom colorPass
 		this.colorPass = new ColorPass()
-		this.colorPass.createGui(f)
+		//this.colorPass.createGui(f)
 
 		this.passes.push( this.bloomPass )
 		this.passes.push( this.colorPass )
-		
+
 		// -------------------------------------------------------------------------------------------------- YOUR SCENE
+		const nbTriangle = 18;
+
+		const angleStep = Math.PI*2/nbTriangle;
+
+		const group = new THREE.Group();
+		const scale = 50;
+		group.scale.set(scale,scale,scale);
+
+		for (var j = 30; j > 0; j--) {
+			const circleGroup = this.createCircleGroup(j*.2, nbTriangle, j);
+			circleGroup.rotation.z =  j*angleStep/2;
+			const scale = .2+j*.2;
+			//circleGroup.scale.set( scale, scale, scale )
+			group.add(circleGroup);
+		}
+		this.scene.add(group);
 
 		let geometry = new THREE.IcosahedronGeometry(100,2)
 		let material = new THREE.MeshBasicMaterial( { color: 0xffffff, wireframe:false } )
-		this.meshBig = new THREE.Mesh( geometry, material )
-		this.scene.add( this.meshBig )
+		this.meshBig = new THREE.Mesh( geometry, material );
+		//this.scene.add( this.meshBig )
 
-		let customMaterial = new THREE.RawShaderMaterial( { 
+		let customMaterial = new THREE.RawShaderMaterial( {
 			uniforms: {
 				color: { type: "c", value: new THREE.Color( 0x00ff00 ) }
 			},
@@ -67,23 +83,65 @@ class Main {
 		} )
 		this.meshSmall = new THREE.Mesh( geometry, customMaterial )
 		this.meshSmall.scale.set( 1, 1, 1 )
-		this.scene.add( this.meshSmall )
+		//this.scene.add( this.meshSmall )
 
 		this.theta = 0
 		this.phi = 0
 		this.radius = 150
 
 		// if you don't want to hear the music, but keep analysing it, set 'shutup' to 'true'!
-		audio.start( { live: false, shutup: true, showPreview: true } )
+		audio.start( { live: false, shutup: true, showPreview: false } )
 		audio.onBeat.add( this.onBeat )
 
 		window.addEventListener( 'resize', this.onResize, false )
 		this.animate()
 	}
+	createCircleGroup(radius = .5, nbTriangle = 18, index){
+		const group = new THREE.Group();
+		const triangles = [];
+		const angleStep = Math.PI*2/nbTriangle;
+		const colors = [0x30868B, 0x93B424, 0x2F64A0, 0xE88C2D, 0xD32541, 0xAA1F8C];
+		for (var i = 0; i < nbTriangle; i++) {
+			triangles[i] = this.createTriangleMesh(colors[(i*2+index)%(colors.length-1)]);
+			const angle = angleStep*i;
+			triangles[i].position.x = Math.cos(angle) * radius;
+			triangles[i].position.y = Math.sin(angle) * radius;
+			triangles[i].rotation.z = angle-Math.PI/2;
+			group.add( triangles[i] );
+		}
+		return group;
+	}
+	createTriangleMesh(color){
+
+		const mesh = new THREE.Mesh(
+			this.createTriangleGeometry(),
+			new THREE.MeshBasicMaterial({color: color}),
+		);
+		return mesh;
+	}
+	createTriangleGeometry(){
+		const geometry = new THREE.BufferGeometry()
+		const count = 3
+		const positions = new Float32Array(count * 3)
+		const multiply = 1;
+		positions[0] = 0.5*multiply; //x
+		positions[1] = 0*multiply; //y
+		positions[2] = 0*multiply; //z
+
+		positions[3] = 0*multiply;
+		positions[4] = 1.1*multiply;
+		positions[5] = 0*multiply;
+
+		positions[6] = -0.5*multiply;
+		positions[7] = 0*multiply;
+		positions[8] = 0*multiply;
+		geometry.addAttribute( 'position', new THREE.BufferAttribute( positions, 3 ) );
+		return geometry;
+	}
 
 
 	// -------------------------------------------------------------------------------------------------- ON BEAT
-	
+
 	onBeat = () => {
 		this.meshSmall.material.uniforms.color.value.r = Math.random()
 	}
