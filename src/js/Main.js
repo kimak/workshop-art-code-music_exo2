@@ -32,6 +32,7 @@ class Main {
 		this.passes = []
 
 		const f = gui.addFolder('postprocess')
+		f.open()
 
 		//create a bloom pass
 		this.bloomPass = new WAGNER.MultiPassBloomPass(128,128)
