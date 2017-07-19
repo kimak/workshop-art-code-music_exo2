@@ -46,9 +46,19 @@ class Main {
 		g.add(this.bloomPass.params,'zoomBlurStrength',0,1)
 		g.add(this.bloomPass.params,'blurAmount',0,1)
 		g.add(this.bloomPass.params,'applyZoomBlur')
+
+		this.scale = .2//.2
+		this.radius = .15//.2
+		this.colorModulo = 2
+
+		let s = f.addFolder('custom')
+		s.add(this,'scale',0,2).onChange(this.createRosace.bind(this))
+		s.add(this,'radius',0,2).onChange(this.createRosace.bind(this))
+		s.add(this,'colorModulo',0,20).step(1).onChange(this.createRosace.bind(this))
+
 		//custom colorPass
 		this.colorPass = new ColorPass()
-		//this.colorPass.createGui(f)
+		this.colorPass.createGui(f)
 
 		this.passes.push( this.bloomPass )
 		this.passes.push( this.colorPass )
@@ -72,10 +82,6 @@ class Main {
 		this.meshSmall.scale.set( 1, 1, 1 )
 		//this.scene.add( this.meshSmall )
 
-		this.theta = 0
-		this.phi = 0
-		this.radius = 150
-
 		// if you don't want to hear the music, but keep analysing it, set 'shutup' to 'true'!
 		audio.start( { live: false, shutup: true, showPreview: false } )
 		audio.onBeat.add( this.onBeat )
@@ -84,28 +90,33 @@ class Main {
 		this.animate()
 	}
 	createRosace(){
+		if(this.rosace){
+			this.scene.remove(this.rosace);
+			this.rosace = null;
+		}
 		const nbTriangle = 18;
 		const angleStep = Math.PI*2/nbTriangle;
-		const group = new THREE.Group();
-		const scale = 50;
-		group.scale.set(scale,scale,scale);
+		this.rosace = new THREE.Group();
+		const scale = 30;
+		this.rosace.scale.set(scale,scale,scale);
 
 		for (var j = 30; j > 0; j--) {
-			const circleGroup = this.createCircleGroup(j*.2, nbTriangle, j);
-			circleGroup.rotation.z =  j*angleStep/2;
-			const scale = .2+j*.2;
+			const circleGroup = this.createCircleGroup(j*this.radius/*-this.radius+j*this.radius*/, nbTriangle, j);
+			circleGroup.rotation.z =  j%2*(angleStep+angleStep*0.5);
+			const scale = j*this.scale;
 			circleGroup.scale.set( scale, scale, scale )
-			group.add(circleGroup);
+			this.rosace.add(circleGroup);
 		}
-		this.scene.add(group);
+		this.scene.add(this.rosace);
 	}
 	createCircleGroup(radius = .5, nbTriangle = 18, index){
 		const group = new THREE.Group();
 		const triangles = [];
 		const angleStep = Math.PI*2/nbTriangle;
-		const colors = [0x30868B, 0x93B424, 0x2F64A0, 0xE88C2D, 0xD32541, 0xAA1F8C];
+		const colors = [0x35C39D,0xA6C92C,0xF9D026,0xF39137,0xE02348,0xB6218D,0x603381,0x356CA9,0x3894A1];
+
 		for (var i = 0; i < nbTriangle; i++) {
-			const selectColorIndex = (i*2+index)%(colors.length-1);
+			const selectColorIndex = i%(colors.length);
 			triangles[i] = this.createTriangleMesh(colors[selectColorIndex]);
 			const angle = angleStep*i;
 			triangles[i].position.x = Math.cos(angle) * radius;
@@ -140,7 +151,7 @@ class Main {
 		positions[2] = 0*multiply; //z
 
 		positions[3] = 0*multiply;
-		positions[4] = 1.1*multiply;
+		positions[4] = 1*multiply;
 		positions[5] = 0*multiply;
 
 		positions[6] = -0.5*multiply;

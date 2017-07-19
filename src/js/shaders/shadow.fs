@@ -13,5 +13,5 @@ uniform vec3 color;
 varying vec3 vux;
 
 void main() {
-	gl_FragColor = vec4( color*(smoothstep(0., 0.25,vux.y*1.0)), 1.0 );
+	gl_FragColor = vec4( color*(smoothstep(0., 0.3,vux.y*1.0)), 1.0 );
 }
