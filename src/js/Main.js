@@ -47,13 +47,15 @@ class Main {
 		g.add(this.bloomPass.params,'blurAmount',0,1)
 		g.add(this.bloomPass.params,'applyZoomBlur')
 
-		this.scale = .3//.2
-		this.radius = 1.3//.2
-		this.colorModulo = 2
+
+		this.scale = .8//.3
+		this.radius = 1.35//1.3
+		this.colorModulo = 2;
+		this.radiusOffset = 0;
 
 		let s = f.addFolder('custom')
-		s.add(this,'scale',0,2).onChange(this.createRosace.bind(this))
-		s.add(this,'radius',0,2).onChange(this.createRosace.bind(this))
+		s.add(this,'scale',0,40).step(0.01).onChange(this.createRosace.bind(this))
+		s.add(this,'radius',0,40).step(0.01).onChange(this.createRosace.bind(this))
 		s.add(this,'colorModulo',0,20).step(1).onChange(this.createRosace.bind(this))
 
 		//custom colorPass
@@ -64,6 +66,10 @@ class Main {
 		this.passes.push( this.colorPass )
 
 		// -------------------------------------------------------------------------------------------------- YOUR SCENE
+		this.nbTriangle = 18;
+		this.nbCircle = 30;
+		this.globalScale = 0;
+		this.angleStep = Math.PI*2/this.nbTriangle;
 		this.createRosace();
 
 		let geometry = new THREE.IcosahedronGeometry(100,2)
@@ -94,37 +100,44 @@ class Main {
 			this.scene.remove(this.rosace);
 			this.rosace = null;
 		}
-		const nbTriangle = 18;
-		const angleStep = Math.PI*2/nbTriangle;
+		this.circles = [];
 		this.rosace = new THREE.Group();
-		const scale = 1;
-		this.rosace.scale.set(scale,scale,scale);
+		this.rosace.scale.setScalar(40)
 
-		for (var j = 30; j > 0; j--) {
-			let r = Math.pow(1 + this.radius, j);
-			const circleGroup = this.createCircleGroup(this.radius, nbTriangle, j);
-			circleGroup.rotation.z =  j%2*(angleStep+angleStep*0.5);
-			circleGroup.scale.setScalar(Math.pow(1 + this.scale, j))
-			this.rosace.add(circleGroup);
+		for (var j = this.nbCircle; j > 0; j--) {
+			const group = new THREE.Group();
+			const circle = this.createCircleGroup(j);
+			circle.radiusOffset = 0;
+			circle.group.rotation.z =  j%2*(this.angleStep+this.angleStep*0.5);
+			circle.scaleValue = 1;
+			//group.scale.setScalar(Math.pow(1 + this.scale, j))
+			group.add(circle.group);
+			this.rosace.add(group);
+			this.circles[j]=circle;
 		}
 		this.scene.add(this.rosace);
 	}
-	createCircleGroup(radius = .5, nbTriangle = 18, index){
+	createCircleGroup(index){
 		const group = new THREE.Group();
-		const triangles = [];
-		const angleStep = Math.PI*2/nbTriangle;
-		const colors = [0x35C39D,0xA6C92C,0xF9D026,0xF39137,0xE02348,0xB6218D,0x603381,0x356CA9,0x3894A1];
 
-		for (var i = 0; i < nbTriangle; i++) {
+		const colors = [0x35C39D,0xA6C92C,0xF9D026,0xF39137,0xE02348,0xB6218D,0x603381,0x356CA9,0x3894A1];
+		const triangles = [];
+		for (var i = 0; i < this.nbTriangle; i++) {
 			const selectColorIndex = i%(colors.length);
 			triangles[i] = this.createTriangleMesh(colors[selectColorIndex]);
-			const angle = angleStep*i;
-			triangles[i].position.x = Math.cos(angle) * radius;
-			triangles[i].position.y = Math.sin(angle) * radius;
+			const angle = this.angleStep*i;
+			//group.scale.setScalar(Math.pow(1 + this.scale, j))
+			//group.scale.setScalar(1+this.scale*.1*index);
+			//triangles[i].radius=this.radius*0.4*index;
+			triangles[i].radius=Math.pow(this.radius, index);
+			//console.log(triangles[i].radius)
+			//group.scale.setScalar(triangles[i].radius*this.scale);
+			triangles[i].position.x = Math.cos(angle) * triangles[i].radius;
+			triangles[i].position.y = Math.sin(angle) * triangles[i].radius;
 			triangles[i].rotation.z = angle-Math.PI/2;
 			group.add( triangles[i] );
 		}
-		return group;
+		return {group: group, triangles: triangles}
 	}
 	createTriangleMesh(color){
 
@@ -171,10 +184,58 @@ class Main {
 
 	// -------------------------------------------------------------------------------------------------- EACH FRAME
 
+	//count = 0
 	animate = () => {
 		requestAnimationFrame( this.animate )
 
-		this.meshBig.rotation.x += 0.005
+
+		//let grow = 1.01
+
+		//this.globalScale *= grow;
+
+		// if (this.count === undefined)
+		// 	this.count = 0
+		//
+		// if (this.count++ > 10) {
+		// 	this.count = 0
+		// 	this.globalScale = 1
+		// }
+
+		/*let step = Math.log(this.globalScale) / Math.log(grow)
+		step %= Math.log(this.radius)
+		this.globalScale = Math.pow(grow, step)
+		this.rosace.scale.setScalar(this.globalScale);*/
+
+		//this.globalScale+=0.001;
+
+		for (var j = this.nbCircle; j > 0; j--) {
+			const circle = this.circles[j];
+			//const scalePow = Math.pow(1 + this.scale, j);
+
+			//console.log(Math.pow(1 + this.scale, j)+circle.scaleValue)
+
+			//console.log(circle.scaleValue)
+			//circle.group.scale.setScalar(circle.scaleValue);
+			//console.log(circle.group.scale);
+			//circle.radiusOffset+=0.01;
+			//circle.radiusOffset=Math.pow(circle.scaleValue, j);
+			//circle.group.position.z += 5
+			//console.log(circle.group.position.z)
+
+			//1.3/3
+			//console.log(this.circles[j].group)
+			//this.circles[j].circle.position.z+=1.5;
+			//if(this.circles[j].position.z>800) this.circles[j].position.z = 0;
+			for (var i = 0; i < this.nbTriangle; i++) {
+				const angle = this.angleStep*i;
+				const triangle = this.circles[j].triangles[i]
+				//triangle.position.x = Math.cos(angle) * (this.radius);//-circle.radiusOffset*0.3/1.3
+				//triangle.position.y = Math.sin(angle) * (this.radius-circle.scaleValue);
+				//triangle.position.z = 100 * audio.values[ 2 ]*Math.random()
+			}
+		}
+
+		/*this.meshBig.rotation.x += 0.005
 		this.meshBig.rotation.y += 0.01
 		// play with audio.volume
 		let scale = 1 + .025 * audio.volume
@@ -190,7 +251,7 @@ class Main {
 		// play with audio.values[ 2 ], the green bar of the preview
 		// There is 7 value (audio.values.length = 8)
 		scale = .1 + .05 * audio.values[ 2 ]
-		this.meshSmall.scale.set( scale, scale, scale )
+		this.meshSmall.scale.set( scale, scale, scale )*/
 		this.render()
 	}
 
