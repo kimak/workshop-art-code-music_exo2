@@ -178,7 +178,11 @@ class Main {
 	// -------------------------------------------------------------------------------------------------- ON BEAT
 
 	onBeat = () => {
-		this.meshSmall.material.uniforms.color.value.r = Math.random()
+		//this.meshSmall.material.uniforms.color.value.r = Math.random()
+		for (var j = this.nbCircle; j > 0; j--) {
+			const circle = this.circles[j];
+			circle.group.rotation.z+= ((10*j*Math.random())-circle.group.rotation.z)*0.025;
+		}
 	}
 
 
@@ -188,25 +192,7 @@ class Main {
 	animate = () => {
 		requestAnimationFrame( this.animate )
 
-		this.camera.position.z += (800* audio.volume-this.camera.position.z)*0.025
-		//let grow = 1.01
-
-		//this.globalScale *= grow;
-
-		// if (this.count === undefined)
-		// 	this.count = 0
-		//
-		// if (this.count++ > 10) {
-		// 	this.count = 0
-		// 	this.globalScale = 1
-		// }
-
-		/*let step = Math.log(this.globalScale) / Math.log(grow)
-		step %= Math.log(this.radius)
-		this.globalScale = Math.pow(grow, step)
-		this.rosace.scale.setScalar(this.globalScale);*/
-
-		//this.globalScale+=0.001;
+		this.camera.position.z += (1000* audio.volume-this.camera.position.z)*0.025
 
 		for (var j = this.nbCircle; j > 0; j--) {
 			const circle = this.circles[j];
@@ -219,7 +205,8 @@ class Main {
 			//console.log(circle.group.scale);
 			//circle.radiusOffset+=0.01;
 			//circle.radiusOffset=Math.pow(circle.scaleValue, j);
-			//circle.group.position.z += 5
+			//circle.group.position.z+= ((-200*Math.random()*j-audio.values[ 2 ])-circle.group.position.z)*0.025;
+			circle.group.position.z+= ((-200*j-audio.values[ 2 ])-circle.group.position.z)*0.025;
 			//console.log(circle.group.position.z)
 
 			//1.3/3
