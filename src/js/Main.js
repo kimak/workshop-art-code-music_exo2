@@ -48,8 +48,8 @@ class Main {
 		g.add(this.bloomPass.params,'applyZoomBlur')
 
 
-		this.scale = .8//.3
-		this.radius = 1.35//1.3
+		this.scale = .3//.3
+		this.radius = 1.3//1.3
 		this.colorModulo = 2;
 		this.radiusOffset = 0;
 
@@ -89,7 +89,7 @@ class Main {
 		//this.scene.add( this.meshSmall )
 
 		// if you don't want to hear the music, but keep analysing it, set 'shutup' to 'true'!
-		audio.start( { live: false, shutup: true, showPreview: false } )
+		audio.start( { live: false, shutup: false, showPreview: false } )
 		audio.onBeat.add( this.onBeat )
 
 		window.addEventListener( 'resize', this.onResize, false )
@@ -102,14 +102,14 @@ class Main {
 		}
 		this.circles = [];
 		this.rosace = new THREE.Group();
-		this.rosace.scale.setScalar(40)
+		this.rosace.scale.setScalar(1)
 
 		for (var j = this.nbCircle; j > 0; j--) {
 			const group = new THREE.Group();
 			const circle = this.createCircleGroup(j);
 			circle.radiusOffset = 0;
 			circle.group.rotation.z =  j%2*(this.angleStep+this.angleStep*0.5);
-			circle.scaleValue = 1;
+			//circle.scaleValue = 1;
 			//group.scale.setScalar(Math.pow(1 + this.scale, j))
 			group.add(circle.group);
 			this.rosace.add(group);
@@ -126,14 +126,14 @@ class Main {
 			const selectColorIndex = i%(colors.length);
 			triangles[i] = this.createTriangleMesh(colors[selectColorIndex]);
 			const angle = this.angleStep*i;
-			//group.scale.setScalar(Math.pow(1 + this.scale, j))
+			group.scale.setScalar(Math.pow(1 + this.scale, index))
 			//group.scale.setScalar(1+this.scale*.1*index);
 			//triangles[i].radius=this.radius*0.4*index;
-			triangles[i].radius=Math.pow(this.radius, index);
+			//triangles[i].radius=Math.pow(this.radius, index);
 			//console.log(triangles[i].radius)
 			//group.scale.setScalar(triangles[i].radius*this.scale);
-			triangles[i].position.x = Math.cos(angle) * triangles[i].radius;
-			triangles[i].position.y = Math.sin(angle) * triangles[i].radius;
+			triangles[i].position.x = Math.cos(angle) * this.radius;
+			triangles[i].position.y = Math.sin(angle) * this.radius;
 			triangles[i].rotation.z = angle-Math.PI/2;
 			group.add( triangles[i] );
 		}
@@ -188,7 +188,7 @@ class Main {
 	animate = () => {
 		requestAnimationFrame( this.animate )
 
-
+		this.camera.position.z += (800* audio.volume-this.camera.position.z)*0.025
 		//let grow = 1.01
 
 		//this.globalScale *= grow;
