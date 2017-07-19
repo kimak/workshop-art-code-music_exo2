@@ -23,7 +23,7 @@ class Main {
 
 		// -------------------------------------------------------------------------------------------------- CAMERA
 
-		this.camera = new THREE.PerspectiveCamera( 35, window.innerWidth / window.innerHeight, 1, 1000 )
+		this.camera = new THREE.PerspectiveCamera( 35, window.innerWidth / window.innerHeight, 1, 100000 )
 		this.camera.position.z = 800
 		this.controls = new OrbitControls(this.camera)
 
@@ -47,8 +47,8 @@ class Main {
 		g.add(this.bloomPass.params,'blurAmount',0,1)
 		g.add(this.bloomPass.params,'applyZoomBlur')
 
-		this.scale = .2//.2
-		this.radius = .15//.2
+		this.scale = .3//.2
+		this.radius = 1.3//.2
 		this.colorModulo = 2
 
 		let s = f.addFolder('custom')
@@ -97,14 +97,14 @@ class Main {
 		const nbTriangle = 18;
 		const angleStep = Math.PI*2/nbTriangle;
 		this.rosace = new THREE.Group();
-		const scale = 30;
+		const scale = 1;
 		this.rosace.scale.set(scale,scale,scale);
 
 		for (var j = 30; j > 0; j--) {
-			const circleGroup = this.createCircleGroup(j*this.radius/*-this.radius+j*this.radius*/, nbTriangle, j);
+			let r = Math.pow(1 + this.radius, j);
+			const circleGroup = this.createCircleGroup(this.radius, nbTriangle, j);
 			circleGroup.rotation.z =  j%2*(angleStep+angleStep*0.5);
-			const scale = j*this.scale;
-			circleGroup.scale.set( scale, scale, scale )
+			circleGroup.scale.setScalar(Math.pow(1 + this.scale, j))
 			this.rosace.add(circleGroup);
 		}
 		this.scene.add(this.rosace);
