@@ -38,9 +38,9 @@ class Main {
 
 		//create a bloom pass
 		this.bloomPass = new WAGNER.MultiPassBloomPass(128,128)
-		this.bloomPass.activate = false
+		this.bloomPass.activate = true
 		// this.bloomPass.params.applyZoomBlur = true
-		this.bloomPass.params.blurAmount = 0.4
+		this.bloomPass.params.blurAmount = 0.3
 		let g = f.addFolder('bloom1')
 		g.add(this.bloomPass,'activate')
 		g.add(this.bloomPass.params,'zoomBlurStrength',0,1)
@@ -89,7 +89,7 @@ class Main {
 		//this.scene.add( this.meshSmall )
 
 		// if you don't want to hear the music, but keep analysing it, set 'shutup' to 'true'!
-		audio.start( { live: false, shutup: false, showPreview: false } )
+		audio.start( { live: false, shutup: false, showPreview: false, playlist:["audio/macadam.mp3"] } )
 		audio.onBeat.add( this.onBeat )
 
 		window.addEventListener( 'resize', this.onResize, false )
@@ -108,6 +108,7 @@ class Main {
 			const group = new THREE.Group();
 			const circle = this.createCircleGroup(j);
 			circle.radiusOffset = 0;
+			circle.scaleAnimated = 1;
 			circle.group.rotation.z =  j%2*(this.angleStep+this.angleStep*0.5);
 			//circle.scaleValue = 1;
 			//group.scale.setScalar(Math.pow(1 + this.scale, j))
@@ -119,10 +120,11 @@ class Main {
 	}
 	createCircleGroup(index){
 		const group = new THREE.Group();
-
+		const group2 = new THREE.Group();
 		const colors = [0x35C39D,0xA6C92C,0xF9D026,0xF39137,0xE02348,0xB6218D,0x603381,0x356CA9,0x3894A1];
 		const triangles = [];
 		for (var i = 0; i < this.nbTriangle; i++) {
+
 			const selectColorIndex = i%(colors.length);
 			triangles[i] = this.createTriangleMesh(colors[selectColorIndex]);
 			const angle = this.angleStep*i;
@@ -136,8 +138,9 @@ class Main {
 			triangles[i].position.y = Math.sin(angle) * this.radius;
 			triangles[i].rotation.z = angle-Math.PI/2;
 			group.add( triangles[i] );
+			group2.add( group );
 		}
-		return {group: group, triangles: triangles}
+		return {group: group2, triangles: triangles}
 	}
 	createTriangleMesh(color){
 
@@ -178,10 +181,22 @@ class Main {
 	// -------------------------------------------------------------------------------------------------- ON BEAT
 
 	onBeat = () => {
+		if(audio.volume>3){
+			this.camera.rotation.z+= (1000-1000*audio.volume-this.camera.rotation.z)*0.025
+		}
+		//this.camera.position.z += (10000* Math.random()-this.camera.position.z)*0.025
+		//this.camera.rotation.z+= (1000-1000* Math.random()-this.camera.rotation.z)*0.025
+		//this.camera.rotation.z+= (1000-1000* Math.random()-this.camera.position.z)*0.025
+		//this.camera.position.y+= (1000-1000* Math.random()-this.camera.position.y)*0.025
+		//this.camera.position.z = (1000* Math.random())
 		//this.meshSmall.material.uniforms.color.value.r = Math.random()
 		for (var j = this.nbCircle; j > 0; j--) {
 			const circle = this.circles[j];
-			circle.group.rotation.z+= ((10*j*Math.random())-circle.group.rotation.z)*0.025;
+			//circle.group.rotation.z+= ((10*j*Math.random())-circle.group.rotation.z)*0.025;
+			//circle.group.position.z+= ((10*j*Math.random())-circle.group.rotation.z)*0.025;
+			//circle.group.rotation.z+= ((10*j*Math.random())-circle.group.rotation.z)*0.025;
+			//circle.scaleAnimated+=((1+5*Math.random()*j)-circle.scaleAnimated)*0.025;
+			//circle.group.scale.setScalar(circle.scaleAnimated)
 		}
 	}
 
@@ -192,10 +207,12 @@ class Main {
 	animate = () => {
 		requestAnimationFrame( this.animate )
 
-		this.camera.position.z += (1000* audio.volume-this.camera.position.z)*0.025
+		this.camera.position.z += (5000*audio.volume-this.camera.position.z)*0.025
 
 		for (var j = this.nbCircle; j > 0; j--) {
 			const circle = this.circles[j];
+			circle.scaleAnimated+=((1+.1*audio.volume*.5*Math.random()*j)-circle.scaleAnimated)*0.05;
+						circle.group.scale.setScalar(circle.scaleAnimated)
 			//const scalePow = Math.pow(1 + this.scale, j);
 
 			//console.log(Math.pow(1 + this.scale, j)+circle.scaleValue)
@@ -206,7 +223,7 @@ class Main {
 			//circle.radiusOffset+=0.01;
 			//circle.radiusOffset=Math.pow(circle.scaleValue, j);
 			//circle.group.position.z+= ((-200*Math.random()*j-audio.values[ 2 ])-circle.group.position.z)*0.025;
-			circle.group.position.z+= ((-200*j-audio.values[ 2 ])-circle.group.position.z)*0.025;
+			//circle.group.position.z+= ((-200*j-audio.values[ 2 ])-circle.group.position.z)*0.025;
 			//console.log(circle.group.position.z)
 
 			//1.3/3
