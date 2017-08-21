@@ -48,6 +48,7 @@
     "signals": "^1.0.0",
     "stylus": "^0.54.5",
     "stylus-loader": "^3.0.1",
+    "surge": "^0.19.0",
     "three": "^0.86.0",
     "three-orbit-controls": "^82.1.0",
     "webpack": "^3.3.0",
@@ -62,6 +63,7 @@
     "js:prod": "webpack --progress --env.compress --display-modules --display-reasons",
     "js:prod-extra": "webpack --progress --display-modules --display-reasons --display-exclude='vue' -p",
     "css:dev": "mkdirp app/css && stylus ./src/stylus/main.styl -o app/css/main.css -u nib --sourcemap -w",
-    "css:dist": "stylus src/stylus/main.styl -o app/css -u nib -c"
+    "css:dist": "stylus src/stylus/main.styl -o app/css -u nib -c",
+    "deploy": "npm run dist && surge --domain lab.clevermonkey.io -p ./app"
   }
 }
